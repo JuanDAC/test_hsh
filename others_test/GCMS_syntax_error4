@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# create an alias for 'invalid command' then run it
+
+command="ls ;
+ls # && ls
+ls ; ;"
+
+tmp_file="checker_tmp_file_$RANDOM"
+
+# clean up
+stop_shell
+rm -f $tmp_file
+
+# create a pseudo random file
+touch $tmp_file
+# send commands
+echo "$command" | $SHELL 2> $OUTPUTFILE > /dev/null &
+
+# wait a little bit
+$SLEEP $SLEEPSECONDS
+
+# check the result
+nmatch=`cat $OUTPUTFILE | grep -c ": 3: Syntax error: \";\" unexpected"`
+if [ $nmatch -eq 1 ]; then
+       print_ok
+else
+       print_ko
+fi
+
+# clean up
+stop_shell
+rm -f $tmp_file

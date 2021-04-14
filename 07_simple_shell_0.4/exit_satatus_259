@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# test the exit out prove with the limit number
+tmp_file="checker_tmp_file_$RANDOM"
+EXPECT=3
+command="exit 259"
+
+# clean up
+stop_shell
+rm -f $tmp_file
+
+# create a pseudo random file
+touch $tmp_file
+# run command
+echo "$command" | $SHELL
+echo $? > $OUTPUTFILE
+
+# wait a little bit
+$SLEEP $SLEEPSECONDS
+
+# check the result
+nmatch=`cat $OUTPUTFILE | grep $EXPECT | wc -l`
+if [ $nmatch -eq 1 ]; then
+	print_ok
+else
+	print_ko
+	$ECHO -e "    >[\033[31mYour status exit\033[37m]";
+	$ECHO -e "\t$(cat $OUTPUTFILE)";
+	$ECHO -e "    >[\033[32mExpect status exit\033[37m]";
+	$ECHO -e "\t${EXPECT}";
+fi
+
+# clean up
+stop_shell
+$RM -f $tmp_file
+
+

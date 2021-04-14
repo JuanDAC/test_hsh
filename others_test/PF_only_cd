@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# test only cd
+
+command="cd
+pwd"
+home="$HOME"
+
+# clean up
+stop_shell
+
+# run command
+echo "$command" | $SHELL > $OUTPUTFILE 2> /dev/null &
+
+# wait a little bit
+$SLEEP $SLEEPSECONDS
+
+# check the result
+nmatch=`cat $OUTPUTFILE | grep -c "$home"`
+if [ $nmatch -eq 1 ]; then
+      print_ok
+else
+	   print_ko
+fi
+
+# clean up
+stop_shell

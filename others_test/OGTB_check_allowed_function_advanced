@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# check if the getline function was used by using ltrace
+
+command="env
+ls -la
+setenv toto valtoto
+unsetenv toto
+"
+
+# clean up
+stop_shell
+rm -f $tmp_file
+
+# send commands
+echo "$command" | $LTRACE -bc -o $LTRACEOUTPUTFILE $SHELL > $OUTPUTFILE 2> /dev/null &
+
+# wait a little bit
+$SLEEP $SLEEPSECONDS
+
+# check the result
+#check all  allowed function
+linemax=$(cat -n $LTRACEOUTPUTFILE | grep "total" | cut -f 1 | tr -d ' ')
+f1=(access chdir close closedir execve exit _exit fflush fork free getcwd getline isatty kill malloc open opendir perror read readdir signal stat lstat fstat strtok wait waitpid wait3 wait4 write __xstat __lxstat __xstat)
+i=3
+b=0
+linemax=$(($linemax - 2))
+while [ $i -le $linemax ]
+do
+	fname=$(cat $LTRACEOUTPUTFILE | rev | cut -d ' ' -f 1 | rev | cat -n | tr -d ' ' | tr '\t' ' ' | grep "^$i " | cut -d ' ' -f 2)
+	b=0 
+	for f in "${f1[@]}"
+	do  
+		if [ $fname = $f ]
+		then
+			b=1 
+		fi  
+	done
+	if [ $b -eq 0 ] 
+	then
+		echo -e "\nNot allowed: $fname [\033[31mKO\033[37m]"
+	fi  
+	i=$(($i + 1))
+done
+if [ $b -eq 1 ]
+then
+	echo -e "[\033[32mOK\033[37m]"
+fi
+# clean up
+stop_shell
+rm -f $tmp_file

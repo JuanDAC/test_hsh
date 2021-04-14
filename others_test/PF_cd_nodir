@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# test simple command /bin/ls
+
+command="cd thecheckerisbroken"
+
+# clean up
+stop_shell
+
+# create a pseudo random file
+# run command
+echo "$command" | $SHELL 2> $OUTPUTFILE > /dev/null &
+
+# wait a little bit
+$SLEEP $SLEEPSECONDS
+
+# check the result
+nmatch=`cat $OUTPUTFILE | grep -c "1: cd: can't cd to thecheckerisbroken"`
+if [ $nmatch -eq 1 ]; then
+      print_ok
+else
+	   print_ko
+fi
+
+# clean up
+stop_shell
